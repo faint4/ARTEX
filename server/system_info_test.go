@@ -31,9 +31,18 @@ func TestSystemInfoEndpoint(t *testing.T) {
 	if err != nil {
 		t.Skipf("postgres unavailable (%v) — skipping", err)
 	}
-	defer m.Close()
 	td := t.TempDir()
-	s := New(context.Background(), m, td, td, td)
+	// 用可取消的 ctx 而非 context.Background()：测试结束时 cancel() 触发
+	// ctx.Done()，后台 goroutine（worker/planner/scheduler 等）收到信号退出，
+	// 否则它们会继续写 t.TempDir() 里的文件，导致 Go 1.20+ 下 t.TempDir
+	// 的 cleanup 报 "directory not empty" 让测试 FAIL。
+	// defer 顺序按 LIFO：cancel 先执行 -> sleep 等 goroutine 退出 ->
+	// m.Close() 关闭 PG -> t.TempDir cleanup 删空目录。
+	ctx, cancel := context.WithCancel(context.Background())
+	defer m.Close()
+	defer func() { time.Sleep(200 * time.Millisecond) }()
+	defer cancel()
+	s := New(ctx, m, td, td, td)
 	h := s.Handler()
 	tok, err := signJWT(s.jwtKey)
 	if err != nil {
