@@ -14,13 +14,15 @@ func TestProfileRetryRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Skipf("postgres unavailable (%v) — skipping", err)
 	}
-	defer d.Close()
 
 	want := RetryOverride{
 		Connect: RetryRule{Attempts: 5, IntervalMS: 2000},
 		Empty:   RetryRule{Attempts: -1},
 		Stream:  RetryRule{IntervalMS: 250},
 	}
+	// t.Cleanup (first registered → last run) instead of `defer d.Close()`, so
+	// the row-deleting cleanup still has a live pool (see config_test.go).
+	t.Cleanup(func() { d.Close() })
 	id, err := d.SaveProfile(&LLMProfile{
 		Name: "t-retry-roundtrip", Format: "openai", Model: "m", APIKey: "k", Retry: want,
 	})
@@ -71,7 +73,9 @@ func TestProfileRetryClampedOnSave(t *testing.T) {
 	if err != nil {
 		t.Skipf("postgres unavailable (%v) — skipping", err)
 	}
-	defer d.Close()
+	// t.Cleanup (first registered → last run) instead of `defer d.Close()`, so
+	// the row-deleting cleanup still has a live pool (see config_test.go).
+	t.Cleanup(func() { d.Close() })
 
 	id, err := d.SaveProfile(&LLMProfile{
 		Name: "t-retry-clamp", Format: "openai", Model: "m", APIKey: "k",

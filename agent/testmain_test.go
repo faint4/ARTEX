@@ -1,30 +1,25 @@
 package agent
 
 import (
-	"database/sql"
+	"fmt"
 	"os"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/Autumn-27/artex/internal/testdb"
 )
 
-// TestMain acquires a PostgreSQL advisory lock (7337741002) for the entire
-// agent test suite so cross-package DELETE cleanup races with db/server
-// packages are avoided when running `go test ./...`.
+// The agent package tests share one postgres database (db.DSN()) with the db
+// and server test packages (CI runs everything with -p 1 in one go test
+// invocation). testdb.ResetAll takes the cross-package suite advisory lock and
+// truncates once before the package's tests start, so leftovers from other
+// packages — or from a previous go test invocation (companies, assets,
+// tasks…) — cannot skew assertions that count or scope rows. Within the
+// package, tests run serially and clean up after themselves, matching CI
+// where this package runs against a fresh database.
 func TestMain(m *testing.M) {
-	dsn, _, err := db.DSN()
-	if err != nil {
-		os.Exit(m.Run())
+	if err := testdb.ResetAll(); err != nil {
+		fmt.Fprintf(os.Stderr, "agent tests: reset shared database: %v\n", err)
+		os.Exit(1)
 	}
-	conn, err := sql.Open("pgx", dsn)
-	if err != nil || conn.Ping() != nil {
-		os.Exit(m.Run())
-	}
-	defer conn.Close()
-	if _, err := conn.Exec(`SELECT pg_advisory_lock(7337741002)`); err != nil {
-		os.Exit(m.Run())
-	}
-	defer conn.Exec(`SELECT pg_advisory_unlock(7337741002)`) //nolint:errcheck
 	os.Exit(m.Run())
 }

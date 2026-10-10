@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+### 安全
+
+#### 新增的功能
+
+- **登录失败 IP 限流**：`POST /api/auth/login` 现按客户端 IP 限流——5 分钟窗口内连续失败 5 次后封锁该 IP 5 分钟，期间任何尝试（含密码正确的）返回 `429` + `Retry-After` 头并跳过 bcrypt 计算，冷却过后自动恢复，成功登录即清零计数。请求格式错误（400）不计入失败，避免被利用来封禁他人。已知牺牲：部署在反向代理之后时，默认只认 TCP 对端地址（不信任 `X-Forwarded-For`，防止伪造头绕过限流），所有代理后用户会共享同一计数——这是有意为之的安全默认，代理信任开关将在后续版本提供配置入口。
+- **封锁事件可观测**：仅在某 IP 触发封锁时输出一条 `[auth] IP=x.x.x.x blocked after 5 failures, cooldown=300s` INFO 日志；普通失败不打日志——失败洪泛不会变成刷爆磁盘的日志攻击向量。
+
+### 工程化
+
+#### 新增的功能
+
+- **SDD 规范体系升级（对齐 github/spec-kit 方法论）**：`specs/` 目录约定（`{NNN}-{feature}/spec.md + plan.md + tasks.md`）、用户故事按 P1/P2/P3 优先级切片（各自独立可测）、FR/SC/AC 编号化需求、plan 阶段宪法 Gate 检查（红线/架构/简约/防抽象/集成优先/迁移）与 Complexity Tracking、宪法 v2.0 引入 Governance 修订机制。
+- **GitHub 维护基础设施**：Issue 模板（feature 映射 spec 结构 / bug 轻量路径）、PR 模板（强制关联 Issue、SDD 工件勾选、质量门槛清单）、CI 工作流（gofmt/go vet/go test -race + PostgreSQL service + biome + 前端静态构建）。
+
 ## [0.3.15] - 2026-10-07
 
 ### 拦截
