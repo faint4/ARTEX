@@ -1,4 +1,4 @@
-# Tasks — Release 构建时间戳（build_time）
+﻿# Tasks — Release 构建时间戳（build_time）
 
 > Spec：`specs/002-release-build-timestamp/spec.md` ｜ Plan：`plan.md`
 > 分支：`002-release-build-timestamp`
@@ -26,6 +26,6 @@
 
 - [x] T011 gofmt + go vet + 容器内 `-race -p 1` 全量回归（含 system_info / selfupdate）
 - [x] T012 web `build:static` 通过（biome + 类型检查）（本地 tsc --noEmit 通过；完整 build 受 Windows/Linux 原生二进制混装限制在 CI 验证）
-- [ ] T013 commit → push → PR → CI 绿 → 合并 main
-- [ ] T014 tag `v0.1.0` push → release.yml 触发 → 验证 GitHub Release 产物（zip + SHA256SUMS）
-- [ ] T015 验证产物内二进制 `-h` 正常、顶栏显示 `版本 · 0.1.0 · {时间戳}`
+- [x] T013 commit → push → PR → CI 绿 → 合并 main
+- [x] T014 tag `v0.1.0` push → release.yml 触发 → 验证 GitHub Release 产物（zip + SHA256SUMS）
+- [x] T015 验证产物内二进制 `-h` 正常、顶栏显示 `版本 · 0.1.0 · {时间戳}`
