@@ -46,6 +46,13 @@ type Server struct {
 	skillDir string // root directory for skill subdirectories
 	jwtKey   []byte // HS256 signing key loaded from / generated into dataDir/jwt.key
 
+	// login rate limiting (specs/001-login-rate-limit): per-IP failure
+	// throttling on POST /api/auth/login. trustProxy stays false so a spoofed
+	// X-Forwarded-For can't bypass the limiter; a config entry is a separate
+	// future feature (spec NG5).
+	loginLimiter *loginRateLimiter
+	trustProxy   bool
+
 	// concMu serializes concurrency-cap decisions (admission + reconcile) so a
 	// scheduler tick and an HTTP settings change / task creation can't both count
 	// free slots off the same snapshot and over-promote past the limit.
@@ -150,7 +157,9 @@ func New(ctx context.Context, m *Manager, skillDir string, dataDir string, keyDi
 		triggerActive: map[string]int{}, triggerCfg: map[string]triggerBehavior{},
 		profChatAgents: map[int64]*agent.ChatAgent{},
 		provByProfile:  map[int64]*provEntry{}, llmHealth: newLLMHealthRegistry(m.pg),
-		taskAgents: map[string]*taskAgentBundle{}, archiveWake: make(chan struct{}, 1)}
+		taskAgents: map[string]*taskAgentBundle{}, archiveWake: make(chan struct{}, 1),
+		loginLimiter: newLoginRateLimiter()}
+	s.loginLimiter.startGC(ctx)
 	s.initSideQuestions()
 	// 熔断阈值/冷却是失败路径上的热参数，启动时把全局重试策略推给 Registry 一次；
 	// 之后每次保存策略再推一次（saveLLMRetryPolicy）。
@@ -658,6 +667,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /api/auth/change-password", s.authChangePassword)
 
 	mux.HandleFunc("GET /api/health", s.health)
+	// /api/system/info is intentionally NOT in the requireAuth whitelist
+	// (auth.go only allows /api/auth/* and /api/health), so this endpoint
+	// requires a valid JWT. See spec/plans/system-info-endpoint.md §4.
+	mux.HandleFunc("GET /api/system/info", s.systemInfo)
 	mux.HandleFunc("GET /api/stats", s.stats)
 	mux.HandleFunc("GET /api/logs", s.getLogs)
 	mux.HandleFunc("GET /api/logs/history", s.getLogsHistory)

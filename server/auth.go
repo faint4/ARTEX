@@ -264,6 +264,15 @@ func (s *Server) authLogin(w http.ResponseWriter, r *http.Request) {
 	if pg == nil {
 		return
 	}
+	// Login rate limiting (specs/001-login-rate-limit): checked before anything
+	// else so a blocked IP never reaches bcrypt (AC2). A blocked IP gets 429
+	// for ANY attempt — malformed bodies included — while malformed bodies on
+	// unblocked IPs are counted as neither success nor failure (AC6).
+	ip := extractClientIP(r, s.trustProxy)
+	if blocked, retryAfter := s.loginLimiter.Check(ip); blocked {
+		writeLoginRateLimited(w, retryAfter)
+		return
+	}
 	var req struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -273,6 +282,7 @@ func (s *Server) authLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if req.Username != "ARTEX" {
+		s.recordLoginFailure(ip)
 		writeErr(w, 401, "用户名或密码错误")
 		return
 	}
@@ -286,13 +296,25 @@ func (s *Server) authLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(req.Password)); err != nil {
+		s.recordLoginFailure(ip)
 		writeErr(w, 401, "用户名或密码错误")
 		return
 	}
+	// Success clears the failure counter (AC4).
+	s.loginLimiter.Reset(ip)
 	tok, err := signJWT(s.jwtKey)
 	if err != nil {
 		writeErr(w, 500, "token 生成失败")
 		return
 	}
 	writeJSON(w, 200, map[string]any{"token": tok})
+}
+
+// recordLoginFailure counts one failed login and emits the single block log
+// line when this failure transitions the IP into the blocked state (FR-010).
+// Ordinary failures stay unlogged — failure floods must not fill the disk.
+func (s *Server) recordLoginFailure(ip string) {
+	if s.loginLimiter.RecordFailure(ip) {
+		logBlocked(ip, loginMaxFailures)
+	}
 }
