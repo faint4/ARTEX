@@ -41,8 +41,12 @@ jobs:
         # 不阻塞本 PR。覆盖范围与宪法 IV（质量门槛）一致：新代码必须 gofmt 干净。
         run: |
           git fetch origin main --depth=1 2>/dev/null || true
-          base=$(git rev-parse --verify origin/main 2>/dev/null && echo origin/main || echo HEAD~1)
-          files=$(git diff --name-only --diff-filter=AM $base...HEAD -- '*.go')
+          if git rev-parse --verify origin/main >/dev/null 2>&1; then
+            base=origin/main
+          else
+            base=HEAD~1
+          fi
+          files=$(git diff --name-only --diff-filter=AM "$base...HEAD" -- '*.go')
           if [ -z "$files" ]; then
             echo "No .go files changed in this PR"
             exit 0
