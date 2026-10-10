@@ -1,4 +1,4 @@
-﻿package server
+package server
 
 // Tests for the login rate limiter (specs/001-login-rate-limit).
 // Traceability: test names map to spec.md user stories / acceptance criteria:

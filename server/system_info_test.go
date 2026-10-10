@@ -12,12 +12,13 @@ import (
 // TestSystemInfoEndpoint exercises GET /api/system/info through the real HTTP
 // mux (requireAuth middleware included) and asserts the acceptance criteria
 // from spec/features/system-info-endpoint.md:
-//   AC1 200 + 6 fields when authenticated
-//   AC2 401 when unauthenticated
-//   AC3 version == server.BuildVersion
-//   AC4 uptime monotonically non-decreasing across two calls
-//   AC5 response contains no blacklist fields (env/secret/path/hostname/api_key)
-//   AC6 /api/health response shape unchanged (regression)
+//
+//	AC1 200 + 6 fields when authenticated
+//	AC2 401 when unauthenticated
+//	AC3 version == server.BuildVersion
+//	AC4 uptime monotonically non-decreasing across two calls
+//	AC5 response contains no blacklist fields (env/secret/path/hostname/api_key)
+//	AC6 /api/health response shape unchanged (regression)
 func TestSystemInfoEndpoint(t *testing.T) {
 	// Save and restore BuildVersion to keep the global package state clean for
 	// parallel test packages. AC3 specifically checks that the field reflects
