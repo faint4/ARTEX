@@ -1,6 +1,6 @@
-# Feature Spec — Release 构建时间戳（build_time）
+﻿# Feature Spec — Release 构建时间戳（build_time）
 
-> 状态：Final（已定稿）
+> 状态：Implemented
 > Feature 目录：`specs/002-release-build-timestamp/` ｜ 关联 Issue：待建
 > 本文档只回答 WHAT & WHY（做什么、为什么），不写 HOW（技术实现）。
 
