@@ -10,22 +10,22 @@
 
 ## Phase 2 — 后端与构建链
 
-- [ ] T003 `build.sh`：`ARTEX_BUILD_TIME` 支持（默认 `date -u +%Y%m%d-%H%M`）+ ldflags 追加 `-X main.buildTime=`
-- [ ] T004 `.github/workflows/release.yml`：binaries job 注入 `ARTEX_BUILD_TIME`（head_commit.timestamp → YYYYMMDD-HHMM，五平台一致）
-- [ ] T005 `cmd/artex/main.go`：`var buildTime = "dev"` + `server.BuildTime = buildTime`
-- [ ] T006 `server/server.go`：`var BuildTime = "dev"`
-- [ ] T007 `server/system_info.go`：响应增加 `build_time`，白名单注释 6→7
-- [ ] T008 `server/system_info_test.go`：AC1 字段集 6→7；`build_time == BuildTime` 断言；全局态保存/恢复
+- [x] T003 `build.sh`：`ARTEX_BUILD_TIME` 支持（默认 `date -u +%Y%m%d-%H%M`）+ ldflags 追加 `-X main.buildTime=`
+- [x] T004 `.github/workflows/release.yml`：binaries job 注入 `ARTEX_BUILD_TIME`（head_commit.timestamp → YYYYMMDD-HHMM，五平台一致）
+- [x] T005 `cmd/artex/main.go`：`var buildTime = "dev"` + `server.BuildTime = buildTime`
+- [x] T006 `server/server.go`：`var BuildTime = "dev"`
+- [x] T007 `server/system_info.go`：响应增加 `build_time`，白名单注释 6→7
+- [x] T008 `server/system_info_test.go`：AC1 字段集 6→7；`build_time == BuildTime` 断言；全局态保存/恢复
 
 ## Phase 3 — 前端
 
-- [ ] T009 `web/src/lib/api.ts`（或 types）：system/info 类型补 `build_time`
-- [ ] T010 `web/src/app/(main)/_components/main-content.tsx`：取数切 system/info；显示 `版本 · {version}` + 条件 ` · {build_time}`（"dev" 省略）
+- [x] T009 `web/src/lib/api.ts`（或 types）：system/info 类型补 `build_time`
+- [x] T010 `web/src/app/(main)/_components/main-content.tsx`：取数切 system/info；显示 `版本 · {version}` + 条件 ` · {build_time}`（"dev" 省略）
 
 ## Phase 4 — 验证与交付
 
-- [ ] T011 gofmt + go vet + 容器内 `-race -p 1` 全量回归（含 system_info / selfupdate）
-- [ ] T012 web `build:static` 通过（biome + 类型检查）
+- [x] T011 gofmt + go vet + 容器内 `-race -p 1` 全量回归（含 system_info / selfupdate）
+- [x] T012 web `build:static` 通过（biome + 类型检查）（本地 tsc --noEmit 通过；完整 build 受 Windows/Linux 原生二进制混装限制在 CI 验证）
 - [ ] T013 commit → push → PR → CI 绿 → 合并 main
 - [ ] T014 tag `v0.1.0` push → release.yml 触发 → 验证 GitHub Release 产物（zip + SHA256SUMS）
 - [ ] T015 验证产物内二进制 `-h` 正常、顶栏显示 `版本 · 0.1.0 · {时间戳}`
