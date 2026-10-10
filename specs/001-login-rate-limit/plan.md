@@ -1,7 +1,7 @@
 # Implementation Plan — 登录失败 IP 限流
 
 > 状态：**Implemented**（2026-10-10；实现与测试计划偏差见 §测试计划备注与 cr_reports/001-login-rate-limit.md）
-> Feature 目录：`specs/001-login-rate-limit/` ｜ 上游：[spec.md](./spec.md) ｜ 关联 Issue：待创建
+> Feature 目录：`specs/001-login-rate-limit/` ｜ 上游：[spec.md](./spec.md) ｜ 关联 Issue：[#1](https://github.com/faint4/ARTEX/issues/1)
 > 上游：spec/features/login-rate-limit.md（旧路径，已迁移至本目录）
 
 ## Summary

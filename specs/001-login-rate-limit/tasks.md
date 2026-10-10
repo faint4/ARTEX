@@ -1,6 +1,6 @@
 # Tasks — 登录失败 IP 限流
 
-> 上游：[plan.md](./plan.md) ｜ 关联 Issue：待创建
+> 上游：[plan.md](./plan.md) ｜ 关联 Issue：[#1](https://github.com/faint4/ARTEX/issues/1)
 > 拆解约定：任务按用户故事分阶段（MVP 递增）；`[P]` 可并行；测试先红后绿；Checkpoint 不过则停。
 > 状态：**全部完成**（2026-10-10）。偏差记录见 plan.md §测试计划备注。
 
@@ -95,4 +95,4 @@
 
 - 红阶段证据：stub 实现下 TestLoginRateStateMachine 因 nil state panic FAIL；集成测试 429 断言 FAIL（记录于 CR 报告）
 - 凭据安全：集成测试经 `/api/auth/init` 设置随机内存密码（CI 全新库成立）；已初始化库回退 `ARTEX_TEST_LOGIN_PASSWORD` 环境变量；真实凭据零入源码
-- Issue 创建后回填 spec.md/tasks.md 的「关联 Issue」
+- Issue #1 已创建（https://github.com/faint4/ARTEX/issues/1）；spec/plan/tasks 三件套「关联 Issue」已回填

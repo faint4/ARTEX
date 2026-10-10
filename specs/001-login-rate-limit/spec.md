@@ -1,7 +1,7 @@
 # Feature Spec — 登录失败 IP 限流
 
 > 状态：**Implemented**（2026-10-10；测试 5/5 绿，AC1–AC12 验收见 cr_reports/001-login-rate-limit.md）
-> Feature 目录：`specs/001-login-rate-limit/` ｜ 关联 Issue：待创建（推送 GitHub 后回填）
+> Feature 目录：`specs/001-login-rate-limit/` ｜ 关联 Issue：[#1](https://github.com/faint4/ARTEX/issues/1)
 > 本文档只回答 WHAT & WHY，不写 HOW。
 
 ## 1. 背景与问题
