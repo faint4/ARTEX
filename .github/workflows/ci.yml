@@ -46,7 +46,7 @@ jobs:
           else
             base=HEAD~1
           fi
-          files=$(git diff --name-only --diff-filter=AM "$base...HEAD" -- '*.go')
+          files=$(git diff --name-only --diff-filter=AM "$base" HEAD -- '*.go')
           if [ -z "$files" ]; then
             echo "No .go files changed in this PR"
             exit 0
