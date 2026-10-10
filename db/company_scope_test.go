@@ -342,6 +342,10 @@ func TestCompanyScopeAttribution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UpsertCompany: %v", err)
 	}
+	// Drop the company (cascades its company_scope rules) after the run: the
+	// asset cleanup below cannot remove the scope rules, and a leftover rule
+	// set would attribute this test's fixed IPs/domains on a re-run (-count=2).
+	t.Cleanup(func() { _ = cs.DeleteCompany(cid) })
 
 	// a pre-existing asset (inserted BEFORE any scope) — must be back-filled.
 	preID, err := as.UpsertSubdomain(UpsertSubdomainReq{Domain: sub})

@@ -17,7 +17,11 @@ func TestPoolProfilesOrder(t *testing.T) {
 	if err != nil {
 		t.Skipf("postgres unavailable (%v) — skipping", err)
 	}
-	defer d.Close()
+	// Close via t.Cleanup (registered first → runs last): a plain `defer
+	// d.Close()` fires before the row-deleting cleanups, whose DELETEs then
+	// hit a closed pool and silently leave the profiles behind (broken under
+	// -count=2 and across invocations). Same pattern as config_max_tokens_test.
+	t.Cleanup(func() { d.Close() })
 
 	mk := func(name string, priority int, exclude bool, key string) int64 {
 		id, err := d.SaveProfile(&LLMProfile{
