@@ -1,0 +1,54 @@
+name: Feature（新功能）
+description: 提出新功能需求。定稿后此 Issue 将关联 specs/{NNN}-{name}/spec.md，实现 PR 合并时自动关闭。
+labels: [type:feature, status:spec-draft]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        按宪法 VI 开发流：本 Issue 是需求入口 → 定稿后创建 `specs/{NNN}-{name}/spec.md`
+        → plan.md（Constitution Gates）→ tasks.md → 实现 → PR（`Closes #N`）。
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景与问题
+      description: 遇到了什么问题，为什么现在做（spec.md §1）
+    validations:
+      required: true
+  - type: textarea
+    id: user-story
+    attributes:
+      label: 期望场景（用户故事）
+      description: 用 Given-When-Then 描述主路径，尽量按优先级给出多个故事切片（spec.md §2）
+      placeholder: |
+        场景: ...
+          Given ...
+          When ...
+          Then ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 可观察、可测量的验收条件（spec.md §8 AC 清单的来源）
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: 明确不做（Non-Goals）
+      description: 防止范围发散（spec.md §4）
+  - type: textarea
+    id: open-questions
+    attributes:
+      label: 开放问题 / 需要澄清的点
+      description: 不确定的内容将标记为 [NEEDS CLARIFICATION]，定稿前必须消解
+
+  - type: checkboxes
+    id: constitution
+    attributes:
+      label: 宪法自查（specs/constitution.md）
+      options:
+        - label: 不涉及未授权目标扫描等红线内容
+        - label: 不破坏双图架构 / planner-worker / guard 边界（或已说明扩展方式）
+        - label: 尽量不新增依赖；如新增已考虑许可证兼容
