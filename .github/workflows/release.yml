@@ -53,6 +53,9 @@ jobs:
           ARTEX_TARGET_OS: ${{ matrix.goos }}
           ARTEX_TARGET_ARCH: ${{ matrix.goarch }}
           ARTEX_BUILD_VERSION: ${{ github.ref_name }}
+          # 五平台矩阵注入同一构建时间戳（tag 指向 commit 的 UTC 时间，specs/002）；
+          # ISO8601 由 build.sh 归一化为 YYYYMMDD-HHMM，避免各 runner 本地时钟漂移。
+          ARTEX_BUILD_TIME: ${{ github.event.head_commit.timestamp }}
           ARTEX_SKIP_FRONTEND: "1"
           ARTEX_SKIP_NPM_CI: "1"
           # UPX 自解压 ELF 在部分 Linux 内核、虚拟化和安全策略下会崩溃。

@@ -36,6 +36,11 @@ import (
 // Defaults to "dev" for local builds. Exposed to the frontend via GET /api/health.
 var BuildVersion = "dev"
 
+// BuildTime is the UTC build timestamp (YYYYMMDD-HHMM), injected from
+// cmd/artex at startup (-ldflags "-X main.buildTime=<stamp>"). Defaults to
+// "dev" for local builds. Exposed via GET /api/system/info (specs/002).
+var BuildTime = "dev"
+
 // Server exposes the ARTEX backend over a JSON HTTP API for the shadcn/ui
 // frontend.
 type Server struct {
