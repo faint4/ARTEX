@@ -26,12 +26,14 @@ var startTime = time.Now()
 //     go_arch, start_time, uptime) and is NOT whitelisted, so it requires
 //     a valid JWT — preventing unauthenticated information disclosure.
 //
-// FIELD WHITELIST (see plan-spec §4): only the 6 fields below may appear in
-// the response. Do NOT add env vars, file paths, hostnames, or any secret
-// material — the test in system_info_test.go enforces this closed set.
+// FIELD WHITELIST (see plan-spec §4, as amended by specs/002): only the 7
+// fields below may appear in the response. Do NOT add env vars, file paths,
+// hostnames, or any secret material — the test in system_info_test.go enforces
+// this closed set.
 func (s *Server) systemInfo(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]any{
 		"version":    BuildVersion,
+		"build_time": BuildTime,
 		"go_version": runtime.Version(),
 		"go_os":      runtime.GOOS,
 		"go_arch":    runtime.GOARCH,

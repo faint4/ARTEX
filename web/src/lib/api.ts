@@ -236,6 +236,19 @@ export const api = {
   // 后端应用版本号（release 时由 ldflags 注入，默认 "dev"）。
   health: () => get<{ ok: boolean; service: string; version: string }>("/health"),
 
+  // 系统诊断信息（认证端点）：version + build_time（specs/002，release 时由
+  // ldflags 注入的 UTC 构建时间戳 YYYYMMDD-HHMM，开发构建为 "dev"）+ 运行时字段。
+  systemInfo: () =>
+    get<{
+      version: string;
+      build_time: string;
+      go_version: string;
+      go_os: string;
+      go_arch: string;
+      start_time: string;
+      uptime: number;
+    }>("/system/info"),
+
   // ---- auth ----
   authStatus: () => get<{ initialized: boolean }>("/auth/status"),
   login: (username: string, password: string) => post<{ token: string }>("/auth/login", { username, password }),

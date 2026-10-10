@@ -9,6 +9,7 @@
 #   ARTEX_TARGET_ARCH=amd64           One target arch in single-target mode.
 #   ARTEX_TARGETS=linux/amd64,...     Comma-separated targets for multi-target mode.
 #   ARTEX_BUILD_VERSION=v0.3.3        Version embedded in the binary and archive name.
+#   ARTEX_BUILD_TIME=20261010-1215    Build timestamp embedded in the binary (UTC, YYYYMMDD-HHMM).
 #   ARTEX_OUTPUT=/path/to/artex       Explicit binary path in single-target mode.
 #   ARTEX_OUTPUT_DIR=dist             Directory for default binary paths.
 #   ARTEX_PACKAGE=1                   Create a zip archive for each target.
@@ -99,6 +100,12 @@ if [ -z "${ARTEX_BUILD_VERSION:-}" ]; then
 fi
 # Release tags are commonly passed as v0.3.3; keep the binary version consistent.
 ARTEX_BUILD_VERSION="${ARTEX_BUILD_VERSION#v}"
+# Build timestamp (UTC, YYYYMMDD-HHMM) embedded alongside the version; CI passes
+# a fixed value so all matrix targets report the same stamp. CI may pass an
+# ISO8601 string (github.event.head_commit.timestamp) — normalise it here with
+# plain sed so no GNU/BSD date divergence is possible; other formats pass through.
+ARTEX_BUILD_TIME="${ARTEX_BUILD_TIME:-$(date -u +%Y%m%d-%H%M)}"
+ARTEX_BUILD_TIME="$(printf '%s' "$ARTEX_BUILD_TIME" | sed -E 's/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}).*/\1\2\3-\4\5/')"
 ARTEX_OUTPUT_DIR="${ARTEX_OUTPUT_DIR:-dist}"
 ARTEX_PACKAGE_DIR="${ARTEX_PACKAGE_DIR:-$ARTEX_OUTPUT_DIR}"
 ARTEX_UPX_ARGS="${ARTEX_UPX_ARGS:---best --lzma}"
@@ -219,7 +226,7 @@ build_target() {
   go build \
     -tags embedui \
     -trimpath \
-    -ldflags "-s -w -buildid= -X main.version=${ARTEX_BUILD_VERSION}" \
+    -ldflags "-s -w -buildid= -X main.version=${ARTEX_BUILD_VERSION} -X main.buildTime=${ARTEX_BUILD_TIME}" \
     -o "$output" \
     ./cmd/artex
 

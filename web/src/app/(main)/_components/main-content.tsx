@@ -35,12 +35,21 @@ export function MainContent({ children }: { children: ReactNode }) {
   const currentUser = useCurrentUser();
   const pathname = usePathname();
   const [version, setVersion] = useState("");
+  const [buildTime, setBuildTime] = useState("");
 
   useEffect(() => {
+    // specs/002：顶栏版本显示 tag + 构建时间戳并存；开发构建（build_time="dev"）
+    // 保持 "版本 · dev" 不变。取数走认证的 system/info（一次请求同时拿两字段）。
     api
-      .health()
-      .then((h) => setVersion((h.version ?? "").replace(/^v(?=\d)/, "")))
-      .catch(() => setVersion(""));
+      .systemInfo()
+      .then((i) => {
+        setVersion((i.version ?? "").replace(/^v(?=\d)/, ""));
+        setBuildTime(i.build_time ?? "");
+      })
+      .catch(() => {
+        setVersion("");
+        setBuildTime("");
+      });
   }, []);
 
   if (isFullBleed(pathname)) {
@@ -66,7 +75,10 @@ export function MainContent({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-2">
             {version && (
-              <span className="font-medium text-muted-foreground text-xs tabular-nums">版本 · {version}</span>
+              <span className="font-medium text-muted-foreground text-xs tabular-nums">
+                版本 · {version}
+                {buildTime && buildTime !== "dev" && <> · {buildTime}</>}
+              </span>
             )}
             <UpdateBadge />
             <LayoutControls />

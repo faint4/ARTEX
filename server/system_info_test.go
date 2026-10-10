@@ -26,6 +26,9 @@ func TestSystemInfoEndpoint(t *testing.T) {
 	orig := BuildVersion
 	defer func() { BuildVersion = orig }()
 	BuildVersion = "vtest-9.9.9"
+	origTime := BuildTime
+	defer func() { BuildTime = origTime }()
+	BuildTime = "20261010-1215"
 
 	m, err := NewManager(t.TempDir(), "")
 	if err != nil {
@@ -53,6 +56,7 @@ func TestSystemInfoEndpoint(t *testing.T) {
 	// top-level key is a leak and fails AC5.
 	allowedFields := map[string]struct{}{
 		"version":    {},
+		"build_time": {},
 		"go_version": {},
 		"go_os":      {},
 		"go_arch":    {},
@@ -93,7 +97,7 @@ func TestSystemInfoEndpoint(t *testing.T) {
 			t.Fatalf("AC5/AC1: unexpected field %q (allowed set = %v)", k, keysOf(allowedFields))
 		}
 	}
-	for _, f := range []string{"version", "go_version", "go_os", "go_arch", "start_time", "uptime"} {
+	for _, f := range []string{"version", "build_time", "go_version", "go_os", "go_arch", "start_time", "uptime"} {
 		if _, ok := out1[f]; !ok {
 			t.Fatalf("AC1: missing field %q in response %v", f, out1)
 		}
@@ -102,6 +106,11 @@ func TestSystemInfoEndpoint(t *testing.T) {
 	// --- AC3: version == BuildVersion ---
 	if v, _ := out1["version"].(string); v != BuildVersion {
 		t.Fatalf("AC3: version=%q want %q", v, BuildVersion)
+	}
+
+	// --- AC3b (specs/002): build_time == BuildTime ---
+	if bt, _ := out1["build_time"].(string); bt != BuildTime {
+		t.Fatalf("AC3b: build_time=%q want %q", bt, BuildTime)
 	}
 
 	// --- AC4: uptime monotonically non-decreasing ---

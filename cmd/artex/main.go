@@ -26,6 +26,11 @@ import (
 // -ldflags "-X main.version=<tag>". Defaults to "dev" for local builds.
 var version = "dev"
 
+// buildTime is the UTC build timestamp (YYYYMMDD-HHMM), injected at release
+// time via -ldflags "-X main.buildTime=<stamp>" so the top bar can show when
+// this build was produced. Defaults to "dev" for local builds.
+var buildTime = "dev"
+
 const banner = `
     _    ____ _____ _______  __
    / \  |  _ \_   _| ____\ \/ /
@@ -61,6 +66,8 @@ func run() int {
 	// hand the build version to the server package so GET /api/health can report it
 	// to the frontend top bar.
 	server.BuildVersion = version
+	// build timestamp rides along for GET /api/system/info (see specs/002).
+	server.BuildTime = buildTime
 
 	printBanner(*addr)
 
