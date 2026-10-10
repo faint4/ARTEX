@@ -65,18 +65,12 @@ jobs:
       - name: go vet
         run: go vet ./...
 
-      - name: go test (race)
-        # 上游遗留 4 个测试在 CI（race + 全新 PG）下不稳定：
-        #   TestGraphOverviewExpandsAssociatedCompanyScope (agent)
-        #   TestSideUsageRecordedOnceOnConsumerCancellation (llmrec)
-        #   TestInheritedActivityDetailAndRelationDeletion (server)
-        #   TestChatMentionCatalogAndContext (server)
-        # 用 -skip 精确排除（Go 1.20+ 支持），其他测试照常全量回归；
-        # 修复后从 -skip 列表移除。跟踪：Issue #4。
-        run: |
-          go test -race -timeout 10m \
-            -skip 'TestGraphOverviewExpandsAssociatedCompanyScope|TestSideUsageRecordedOnceOnConsumerCancellation|TestInheritedActivityDetailAndRelationDeletion|TestChatMentionCatalogAndContext' \
-            ./...
+      - name: go test (race, serial)
+        # 用 `-p 1` 串行跑每个包：保留 -race 的并发安全检测，但避免
+        # 多个测试包同时共享同一 PG service 容器时产生跨包干扰的假
+        # race 报告（这是 ./... 全量并行跑 -race 的常见问题）。
+        # 上游遗留的不稳定测试 (TempDir cleanup / LLM provider) 跟踪：Issue #4。
+        run: go test -race -p 1 -timeout 15m ./...
 
   frontend:
     name: Frontend biome & build
